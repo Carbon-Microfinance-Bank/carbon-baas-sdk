@@ -4,4 +4,5 @@ interface ResolveAccountRequest {
 }
 export declare function fetchBanks(): Promise<any>;
 export declare function resolveAccount(accountData: ResolveAccountRequest): Promise<any>;
+export declare function fetchBanksUptime(): Promise<any>;
 export {};

@@ -49,50 +49,187 @@ const accountDetails = await fetchAccount('account_number');
 console.log(accountDetails);
 ```
 
-## API
+```javascript
+import { initialize } from 'carbon-baas-sdk';
 
-### initialize(apiKey, mode)
-- `apiKey`: Your Carbon API key.
-- `mode`: The mode of the API ('live' or 'sandbox').
+initialize('your_api_key_here', 'sandbox');
+```
 
-### createAccount(customerId, accountType)
-- `customerId`: The ID of the customer.
-- `accountType`: The type of account to create (e.g., 'static').
+## API Reference
 
-### fetchAccount(accountNumber)
-- `accountNumber`: The account number to fetch details for.
+### Authentication
+```javascript
+initialize(apiKey: string, mode: 'live' | 'sandbox')
+```
 
-### verifyTransaction(accountNumber, reference)
-- `accountNumber`: The account number.
-- `reference`: The transaction reference.
+### Accounts
+```javascript
+createAccount(accountData: CreateAccountRequest)
+// accountData: { customer_id: string, account_type: string }
 
-### fetchTransactions(accountNumber, page, limit)
-- `accountNumber`: The account number.
-- `page`: The page number for paginated results.
-- `limit`: The number of transactions to be returned per page.
+fetchAccount(accountNumber: string)
+```
 
-### createCustomer(customerData)
-- `customerData`: The data of the customer to create.
+### Customers
+```javascript
+createCustomer(customerData: CreateCustomerRequest)
+// customerData: {
+//   first_name: string;
+//   last_name: string;
+//   email: string;
+//   phone: string;
+//   dob: string;
+//   gender: string;
+//   street: string;
+//   city: string;
+//   state: string;
+//   country: string;
+//   bvn: string;
+//   nin: string;
+// }
 
-### fetchCustomer(customerId)
-- `customerId`: The ID of the customer to fetch.
+fetchCustomer(customerId: string)
 
-### fetchCustomers(page, limit)
-- `page`: The page number for paginated results.
-- `limit`: The number of customers to be returned per page.
+fetchCustomers(page?: number, limit?: number)
+```
 
-### initiatePayout(payoutData)
-- `payoutData`: The data of the payout to initiate.
+### Transactions
+```javascript
+verifyTransaction(accountNumber: string, reference: string)
 
-### fetchPayout(payoutId)
-- `payoutId`: The ID of the payout to fetch.
+fetchTransactions(accountNumber: string, page?: number, limit?: number)
+```
 
-### fetchBanks()
-- Fetches the list of banks.
+### Payouts
+```javascript
+initiatePayout(payoutData: InitiatePayoutRequest)
+// payoutData: {
+//   amount: number;
+//   source: { account_number: string };
+//   beneficiary: {
+//     bank_code: string;
+//     bank_name: string;
+//     account_number: string;
+//     account_name: string;
+//   };
+//   reference: string;
+//   meta_data: object;
+//   remark: string;
+// }
 
-### resolveAccount(accountNumber, bankCode)
-- `accountNumber`: The account number to resolve.
-- `bankCode`: The bank code.
+fetchPayout(payoutId: string)
+```
+
+### Banks
+```javascript
+fetchBanks()
+
+resolveAccount(accountData: ResolveAccountRequest)
+// accountData: { account_number: string, bank_code: string }
+
+fetchBanksUptime()
+```
+
+### Webhooks
+```javascript
+fetchWebhook()
+
+updateWebhook(data: UpdateWebhookRequest)
+// data: { url: string }
+
+fetchWebhookHistory(page?: number, limit?: number)
+
+resendWebhookEvent(eventId: string)
+```
+
+## Example Usage
+
+### Managing Accounts
+```javascript
+import { createAccount, fetchAccount } from 'carbon-baas-sdk';
+
+// Create an account
+const newAccount = await createAccount({
+  customer_id: 'customer_123',
+  account_type: 'static'
+});
+
+// Fetch account details
+const accountDetails = await fetchAccount('1234567890');
+```
+
+### Managing Customers
+```javascript
+import { createCustomer, fetchCustomer } from 'carbon-baas-sdk';
+
+// Create a customer
+const customerData = {
+  first_name: 'John',
+  last_name: 'Doe',
+  email: 'john.doe@example.com',
+  phone: '2348012345678',
+  dob: '1990-01-01',
+  gender: 'male',
+  street: '123 Main St',
+  city: 'Lagos',
+  state: 'Lagos',
+  country: 'Nigeria',
+  bvn: '12345678901',
+  nin: '12345678901'
+};
+
+const newCustomer = await createCustomer(customerData);
+
+// Fetch customer details
+const customerDetails = await fetchCustomer('customer_id');
+```
+
+### Managing Webhooks
+```javascript
+import { updateWebhook, fetchWebhookHistory } from 'carbon-baas-sdk';
+
+// Update webhook URL
+const webhook = await updateWebhook({
+  url: 'https://your-webhook-endpoint.com/webhook'
+});
+
+// Fetch webhook history
+const history = await fetchWebhookHistory(1, 10);
+```
+
+### Bank Operations
+```javascript
+import { fetchBanks, resolveAccount, fetchBanksUptime } from 'carbon-baas-sdk';
+
+// Fetch all banks
+const banks = await fetchBanks();
+
+// Resolve account
+const accountDetails = await resolveAccount({
+  account_number: '1234567890',
+  bank_code: '058'
+});
+
+// Check banks uptime
+const uptime = await fetchBanksUptime();
+```
+
+## Error Handling
+
+The SDK uses a consistent error handling pattern. All API calls return a response object that includes status and error information when applicable:
+
+```javascript
+try {
+  const result = await createCustomer(customerData);
+  if (result.status === 'failed') {
+    console.error('API Error:', result.message, result.errors);
+  } else {
+    console.log('Success:', result.data);
+  }
+} catch (error) {
+  console.error('Request failed:', error);
+}
+```
 
 ## License
 
