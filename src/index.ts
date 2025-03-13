@@ -31,3 +31,4 @@ export { verifyTransaction, fetchTransactions } from './transactions';
 export { createCustomer, fetchCustomer, fetchCustomers } from './customers';
 export { initiatePayout, fetchPayout } from './payouts';
 export { fetchBanks, resolveAccount } from './banks';
+export { fetchWebhook, fetchWebhookHistory, updateWebhook, resendWebhookEvent } from './webhook';
