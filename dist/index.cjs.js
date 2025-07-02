@@ -20195,6 +20195,19 @@ function fetchAccount(accountNumber) {
         }
     });
 }
+function fetchAccounts() {
+    return __awaiter(this, arguments, void 0, function* (page = 1, limit = 10) {
+        try {
+            const response = yield getInstance().get(`/v1/accounts`, {
+                params: { page, limit },
+            });
+            return response.data;
+        }
+        catch (error) {
+            return handleError(error);
+        }
+    });
+}
 
 function verifyTransaction(accountNumber, reference) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -20303,28 +20316,6 @@ function resolveAccount(accountData) {
     });
 }
 
-function fetchWebhook() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const response = yield getInstance().get('/v1/webhook');
-            return response.data;
-        }
-        catch (error) {
-            return handleError(error);
-        }
-    });
-}
-function updateWebhook(data) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const response = yield getInstance().put('/v1/webhook', data);
-            return response.data;
-        }
-        catch (error) {
-            return handleError(error);
-        }
-    });
-}
 function fetchWebhookHistory() {
     return __awaiter(this, arguments, void 0, function* (page = 0, limit = 10) {
         try {
@@ -20377,18 +20368,17 @@ function getInstance() {
 exports.createAccount = createAccount;
 exports.createCustomer = createCustomer;
 exports.fetchAccount = fetchAccount;
+exports.fetchAccounts = fetchAccounts;
 exports.fetchBanks = fetchBanks;
 exports.fetchCustomer = fetchCustomer;
 exports.fetchCustomers = fetchCustomers;
 exports.fetchPayout = fetchPayout;
 exports.fetchTransactions = fetchTransactions;
-exports.fetchWebhook = fetchWebhook;
 exports.fetchWebhookHistory = fetchWebhookHistory;
 exports.getInstance = getInstance;
 exports.initialize = initialize;
 exports.initiatePayout = initiatePayout;
 exports.resendWebhookEvent = resendWebhookEvent;
 exports.resolveAccount = resolveAccount;
-exports.updateWebhook = updateWebhook;
 exports.verifyTransaction = verifyTransaction;
 //# sourceMappingURL=index.cjs.js.map

@@ -47,6 +47,10 @@ console.log(account);
 // Fetch an account
 const accountDetails = await fetchAccount('account_number');
 console.log(accountDetails);
+
+//Fetch accounts
+const accounts = await fetchAccounts(page?: number, limit?: number);
+console.log(accounts);
 ```
 
 ```javascript
@@ -186,12 +190,10 @@ const customerDetails = await fetchCustomer('customer_id');
 
 ### Managing Webhooks
 ```javascript
-import { updateWebhook, fetchWebhookHistory } from 'carbon-baas-sdk';
+import { resendWebhookEvent, fetchWebhookHistory } from 'carbon-baas-sdk';
 
-// Update webhook URL
-const webhook = await updateWebhook({
-  url: 'https://your-webhook-endpoint.com/webhook'
-});
+// Resend webhook event
+const webhook = await resendWebhookEvent(eventId);
 
 // Fetch webhook history
 const history = await fetchWebhookHistory(1, 10);
