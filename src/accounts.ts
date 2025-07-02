@@ -24,3 +24,14 @@ export async function fetchAccount(accountNumber: string) {
   }
 }
 
+export async function fetchAccounts(page: number = 1, limit: number = 10) {
+  try {
+    const response = await getInstance().get(`/v1/accounts`, {
+      params: { page, limit },
+    });
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
