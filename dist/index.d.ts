@@ -5,5 +5,5 @@ export { createAccount, fetchAccount, fetchAccounts } from './accounts';
 export { verifyTransaction, fetchTransactions } from './transactions';
 export { createCustomer, fetchCustomer, fetchCustomers } from './customers';
 export { initiatePayout, fetchPayout } from './payouts';
-export { fetchBanks, resolveAccount } from './banks';
+export { fetchBanks, fetchBanksUptime, resolveAccount } from './banks';
 export { fetchWebhookHistory, resendWebhookEvent } from './webhook';
