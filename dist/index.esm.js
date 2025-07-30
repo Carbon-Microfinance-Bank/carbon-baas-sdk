@@ -20313,6 +20313,17 @@ function resolveAccount(accountData) {
         }
     });
 }
+function fetchBanksUptime() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield getInstance().get('/v1/banks/uptime');
+            return response.data;
+        }
+        catch (error) {
+            return handleError(error);
+        }
+    });
+}
 
 function fetchWebhookHistory() {
     return __awaiter(this, arguments, void 0, function* (page = 0, limit = 10) {
@@ -20363,5 +20374,5 @@ function getInstance() {
     return instance;
 }
 
-export { createAccount, createCustomer, fetchAccount, fetchAccounts, fetchBanks, fetchCustomer, fetchCustomers, fetchPayout, fetchTransactions, fetchWebhookHistory, getInstance, initialize, initiatePayout, resendWebhookEvent, resolveAccount, verifyTransaction };
+export { createAccount, createCustomer, fetchAccount, fetchAccounts, fetchBanks, fetchBanksUptime, fetchCustomer, fetchCustomers, fetchPayout, fetchTransactions, fetchWebhookHistory, getInstance, initialize, initiatePayout, resendWebhookEvent, resolveAccount, verifyTransaction };
 //# sourceMappingURL=index.esm.js.map

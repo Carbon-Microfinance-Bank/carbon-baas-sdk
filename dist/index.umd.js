@@ -20305,6 +20305,17 @@
           }
       });
   }
+  function fetchBanksUptime() {
+      return __awaiter(this, void 0, void 0, function* () {
+          try {
+              const response = yield getInstance().get('/v1/banks/uptime');
+              return response.data;
+          }
+          catch (error) {
+              return handleError(error);
+          }
+      });
+  }
 
   function fetchWebhookHistory() {
       return __awaiter(this, arguments, void 0, function* (page = 0, limit = 10) {
@@ -20360,6 +20371,7 @@
   exports.fetchAccount = fetchAccount;
   exports.fetchAccounts = fetchAccounts;
   exports.fetchBanks = fetchBanks;
+  exports.fetchBanksUptime = fetchBanksUptime;
   exports.fetchCustomer = fetchCustomer;
   exports.fetchCustomers = fetchCustomers;
   exports.fetchPayout = fetchPayout;
