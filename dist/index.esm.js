@@ -20355,7 +20355,7 @@ function resendWebhookEvent(eventId) {
 let instance;
 function initialize(apiKey, mode) {
     const baseUrl = mode === 'live' ? 'https://carbonapisecure.getcarbon.co/baas/api' : 'https://carbonapistagingsecure.getcarbon.co/baas/api';
-    const accessKey = 'baas-consumers';
+    const accessKey = mode === 'live' ? 'key-auth' : 'baas-consumers';
     if (!apiKey) {
         throw new Error('API key must be provided');
     }
