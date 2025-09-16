@@ -22,8 +22,12 @@ const carbon = require('carbon-baas-sdk');
 
 carbon.initialize('your_api_key_here', 'sandbox');
 
-// Create an account
-carbon.createAccount('customer_id', 'static')
+// Create an account for a third-party customer
+carbon.createAccount({
+  account_type: 'static',
+  third_party: true,
+  customer_id: 'customer_123'
+})
   .then(response => console.log(response))
   .catch(error => console.error(error));
 
@@ -31,25 +35,34 @@ carbon.createAccount('customer_id', 'static')
 carbon.fetchAccount('account_number')
   .then(response => console.log(response))
   .catch(error => console.error(error));
+
+// Fetch all accounts with pagination
+carbon.fetchAccounts(1, 10) // page 1, limit 10
+  .then(response => console.log(response))
+  .catch(error => console.error(error));
 ```
 
 ### ES Modules
 
 ```javascript
-import { initialize, createAccount, fetchAccount } from 'carbon-baas-sdk';
+import { initialize, createAccount, fetchAccount, fetchAccounts } from 'carbon-baas-sdk';
 
 initialize('your_api_key_here', 'sandbox');
 
-// Create an account
-const account = await createAccount('customer_id', 'static');
+// Create an account for a third-party customer
+const account = await createAccount({
+  account_type: 'static',
+  third_party: true,
+  customer_id: 'customer_123'
+});
 console.log(account);
 
 // Fetch an account
 const accountDetails = await fetchAccount('account_number');
 console.log(accountDetails);
 
-//Fetch accounts
-const accounts = await fetchAccounts(page?: number, limit?: number);
+// Fetch accounts
+const accounts = await fetchAccounts(1, 10); // page 1, limit 10
 console.log(accounts);
 ```
 
@@ -69,9 +82,16 @@ initialize(apiKey: string, mode: 'live' | 'sandbox')
 ### Accounts
 ```javascript
 createAccount(accountData: CreateAccountRequest)
-// accountData: { customer_id: string, account_type: string }
+// accountData: { 
+//   account_type: "static",      // Must always be "static"
+//   third_party?: boolean,       // true for third-party customer, false for own business sub-account (defaults to true)
+//   customer_id?: string,        // Required if third_party is true
+//   account_name?: string        // Required if third_party is false
+// }
 
 fetchAccount(accountNumber: string)
+
+fetchAccounts(page?: number, limit?: number)
 ```
 
 ### Customers
@@ -150,16 +170,27 @@ resendWebhookEvent(eventId: string)
 
 ### Managing Accounts
 ```javascript
-import { createAccount, fetchAccount } from 'carbon-baas-sdk';
+import { createAccount, fetchAccount, fetchAccounts } from 'carbon-baas-sdk';
 
-// Create an account
-const newAccount = await createAccount({
-  customer_id: 'customer_123',
-  account_type: 'static'
+// Create an account for a third-party customer
+const newCustomerAccount = await createAccount({
+  account_type: 'static',
+  third_party: true,
+  customer_id: 'customer_123'
+});
+
+// Create a sub-account for your own business (for collections)
+const newSubAccount = await createAccount({
+  account_type: 'static',
+  third_party: false,
+  account_name: 'Collections'
 });
 
 // Fetch account details
 const accountDetails = await fetchAccount('1234567890');
+
+// Fetch all accounts (with pagination)
+const accounts = await fetchAccounts(1, 20); // page 1, 20 items per page
 ```
 
 ### Managing Customers
