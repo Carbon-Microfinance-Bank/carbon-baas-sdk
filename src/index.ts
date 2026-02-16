@@ -1,10 +1,14 @@
 import axios, { AxiosInstance } from 'axios';
+import { CONFIG } from './config';
 
 let instance: AxiosInstance;
 
 export function initialize(apiKey: string, mode: 'live' | 'sandbox') {
-  const baseUrl = mode === 'live' ? 'https://carbonapisecure.getcarbon.co/baas/api' : 'https://carbonapistagingsecure.getcarbon.co/baas/api';
-  const accessKey =  mode === 'live' ? 'key-auth' : 'baas-consumers';
+  if (!CONFIG[mode]) {
+    throw new Error(`Invalid mode: ${mode}. Must be 'live' or 'sandbox'`);
+  }
+  
+  const { baseUrl, accessKey } = CONFIG[mode];
 
   if (!apiKey) {
     throw new Error('API key must be provided');
