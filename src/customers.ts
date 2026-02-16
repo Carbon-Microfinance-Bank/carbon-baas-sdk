@@ -14,7 +14,7 @@ interface CreateCustomerRequest {
   state: string;
   country: string;
   bvn: string;
-  nin: string;
+  nin?: string;
 }
 
 export async function createCustomer(customerData: CreateCustomerRequest) {

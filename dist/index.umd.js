@@ -20120,6 +20120,17 @@
     mergeConfig
   } = axios;
 
+  const CONFIG = {
+      live: {
+          baseUrl: 'https://carbonapisecure.getcarbon.co/baas/api',
+          accessKey: 'key-auth',
+      },
+      sandbox: {
+          baseUrl: 'https://carbonapistagingsecure.getcarbon.co/baas/api',
+          accessKey: 'baas-consumers',
+      },
+  };
+
   /******************************************************************************
   Copyright (c) Microsoft Corporation.
 
@@ -20346,8 +20357,7 @@
 
   let instance;
   function initialize(apiKey, mode) {
-      const baseUrl = mode === 'live' ? 'https://carbonapisecure.getcarbon.co/baas/api' : 'https://carbonapistagingsecure.getcarbon.co/baas/api';
-      const accessKey = mode === 'live' ? 'key-auth' : 'baas-consumers';
+      const { baseUrl, accessKey } = CONFIG[mode];
       if (!apiKey) {
           throw new Error('API key must be provided');
       }
