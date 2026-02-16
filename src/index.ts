@@ -4,6 +4,10 @@ import { CONFIG } from './config';
 let instance: AxiosInstance;
 
 export function initialize(apiKey: string, mode: 'live' | 'sandbox') {
+  if (!CONFIG[mode]) {
+    throw new Error(`Invalid mode: ${mode}. Must be 'live' or 'sandbox'`);
+  }
+  
   const { baseUrl, accessKey } = CONFIG[mode];
 
   if (!apiKey) {

@@ -1,9 +1,10 @@
 // Import the SDK
 const carbon = require('../dist/index.umd.js');
 const dotenv = require('dotenv');
-dotenv.config({ path: '../.env' });
+dotenv.config();
 
 // Initialize the SDK
+console.log('Initializing Carbon SDK...');
 carbon.initialize(process.env.CARBON_API_KEY, process.env.ENV);
 
 
@@ -43,6 +44,38 @@ async function exampleFetchCustomers() {
   }
 }
 
-// Run the examples
-exampleFetchCustomers();
+async function exampleInitiatePayout() {
+  try {
+    const payoutData = {
+      amount: 1000,
+      source: {
+        account_number: '1234567890', //api account number or dashboard account number
+      },
+      beneficiary: {
+        bank_code: '044',
+        bank_name: 'Access Bank',
+        account_number: '1234567890',
+        account_name: 'John Doe',
+      },
+      reference: 'PAYOUT12345',
+      meta_data: {
+        purpose: 'Service Payment'
+      },
+      remark: 'Payout for services rendered',
+    };
+    const payoutResponse = await carbon.initiatePayout(payoutData);
+    console.log('Payout initiated:', payoutResponse);
+  } catch (error) {
+    console.error('Error initiating payout:', error);
+  }
+}
+
+
+async function run() {
+  //await exampleCreateCustomer();
+  //await exampleFetchCustomers();
+  await exampleInitiatePayout();
+}
+
+run();
 
