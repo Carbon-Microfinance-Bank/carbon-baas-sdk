@@ -15,4 +15,5 @@ interface InitiatePayoutRequest {
 }
 export declare function initiatePayout(payoutData: InitiatePayoutRequest): Promise<any>;
 export declare function fetchPayout(payoutId: string): Promise<any>;
+export declare function fetchPayoutsWithPendingApprovals(includeExpired?: boolean): Promise<any>;
 export {};

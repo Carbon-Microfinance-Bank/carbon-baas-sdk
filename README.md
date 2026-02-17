@@ -40,12 +40,17 @@ carbon.fetchAccount('account_number')
 carbon.fetchAccounts(1, 10) // page 1, limit 10
   .then(response => console.log(response))
   .catch(error => console.error(error));
+
+// Fetch account balance
+carbon.fetchAccountBalance('account_number')
+  .then(response => console.log(response))
+  .catch(error => console.error(error));
 ```
 
 ### ES Modules
 
 ```javascript
-import { initialize, createAccount, fetchAccount, fetchAccounts } from 'carbon-baas-sdk';
+import { initialize, createAccount, fetchAccount, fetchAccounts, fetchAccountBalance } from 'carbon-baas-sdk';
 
 initialize('your_api_key_here', 'sandbox');
 
@@ -64,6 +69,10 @@ console.log(accountDetails);
 // Fetch accounts
 const accounts = await fetchAccounts(1, 10); // page 1, limit 10
 console.log(accounts);
+
+// Fetch account balance
+const balance = await fetchAccountBalance('account_number');
+console.log(balance);
 ```
 
 ```javascript
@@ -92,6 +101,8 @@ createAccount(accountData: CreateAccountRequest)
 fetchAccount(accountNumber: string)
 
 fetchAccounts(page?: number, limit?: number)
+
+fetchAccountBalance(accountNumber: string)
 ```
 
 ### Customers
@@ -142,6 +153,8 @@ initiatePayout(payoutData: InitiatePayoutRequest)
 // }
 
 fetchPayout(payoutId: string)
+
+fetchPayoutsWithPendingApprovals(includeExpired?: boolean)
 ```
 
 ### Banks
@@ -170,7 +183,7 @@ resendWebhookEvent(eventId: string)
 
 ### Managing Accounts
 ```javascript
-import { createAccount, fetchAccount, fetchAccounts } from 'carbon-baas-sdk';
+import { createAccount, fetchAccount, fetchAccounts, fetchAccountBalance } from 'carbon-baas-sdk';
 
 // Create an account for a third-party customer
 const newCustomerAccount = await createAccount({
@@ -188,6 +201,9 @@ const newSubAccount = await createAccount({
 
 // Fetch account details
 const accountDetails = await fetchAccount('1234567890');
+
+// Fetch account balance
+const balance = await fetchAccountBalance('1234567890');
 
 // Fetch all accounts (with pagination)
 const accounts = await fetchAccounts(1, 20); // page 1, 20 items per page
@@ -217,6 +233,37 @@ const newCustomer = await createCustomer(customerData);
 
 // Fetch customer details
 const customerDetails = await fetchCustomer('customer_id');
+```
+
+### Managing Payouts
+```javascript
+import { initiatePayout, fetchPayout, fetchPayoutsWithPendingApprovals } from 'carbon-baas-sdk';
+
+// Initiate a payout
+const payoutData = {
+  amount: 1000,
+  source: { account_number: '1234567890' },
+  beneficiary: {
+    bank_code: '058',
+    bank_name: 'GTB',
+    account_number: '0987654321',
+    account_name: 'John Doe'
+  },
+  reference: 'payout_ref_123',
+  meta_data: { description: 'Payment for services' },
+  remark: 'Service payment'
+};
+
+const payout = await initiatePayout(payoutData);
+
+// Fetch payout details
+const payoutDetails = await fetchPayout('payout_id');
+
+// Fetch payouts with pending approvals
+const pendingPayouts = await fetchPayoutsWithPendingApprovals();
+
+// Fetch payouts with pending approvals including expired ones
+const allPendingPayouts = await fetchPayoutsWithPendingApprovals(true);
 ```
 
 ### Managing Webhooks

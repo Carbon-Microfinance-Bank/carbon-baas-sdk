@@ -34,3 +34,11 @@ export async function fetchPayout(payoutId: string) {
     return handleError(error);
   }
 }
+export async function fetchPayoutsWithPendingApprovals(includeExpired: boolean = false) {
+  try {
+    const response = await getInstance().get(`/v1/payouts/approvals?include_expired=${includeExpired}`);
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+}

@@ -15,4 +15,5 @@ interface CreateAccountRequest {
 export declare function createAccount(accountData: CreateAccountRequest): Promise<any>;
 export declare function fetchAccount(accountNumber: string): Promise<any>;
 export declare function fetchAccounts(page?: number, limit?: number): Promise<any>;
+export declare function fetchAccountBalance(accountNumber: string): Promise<any>;
 export {};

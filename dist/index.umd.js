@@ -20742,6 +20742,17 @@
           }
       });
   }
+  function fetchAccountBalance(accountNumber) {
+      return __awaiter(this, void 0, void 0, function* () {
+          try {
+              const response = yield getInstance().get(`/v1/accounts/${accountNumber}/balance`);
+              return response.data;
+          }
+          catch (error) {
+              return handleError(error);
+          }
+      });
+  }
 
   function verifyTransaction(accountNumber, reference) {
       return __awaiter(this, void 0, void 0, function* () {
@@ -20819,6 +20830,17 @@
       return __awaiter(this, void 0, void 0, function* () {
           try {
               const response = yield getInstance().get(`/v1/payouts/${payoutId}`);
+              return response.data;
+          }
+          catch (error) {
+              return handleError(error);
+          }
+      });
+  }
+  function fetchPayoutsWithPendingApprovals() {
+      return __awaiter(this, arguments, void 0, function* (includeExpired = false) {
+          try {
+              const response = yield getInstance().get(`/v1/payouts/approvals?include_expired=${includeExpired}`);
               return response.data;
           }
           catch (error) {
@@ -20915,12 +20937,14 @@
   exports.createAccount = createAccount;
   exports.createCustomer = createCustomer;
   exports.fetchAccount = fetchAccount;
+  exports.fetchAccountBalance = fetchAccountBalance;
   exports.fetchAccounts = fetchAccounts;
   exports.fetchBanks = fetchBanks;
   exports.fetchBanksUptime = fetchBanksUptime;
   exports.fetchCustomer = fetchCustomer;
   exports.fetchCustomers = fetchCustomers;
   exports.fetchPayout = fetchPayout;
+  exports.fetchPayoutsWithPendingApprovals = fetchPayoutsWithPendingApprovals;
   exports.fetchTransactions = fetchTransactions;
   exports.fetchWebhookHistory = fetchWebhookHistory;
   exports.getInstance = getInstance;
