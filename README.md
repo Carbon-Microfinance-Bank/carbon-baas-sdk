@@ -169,10 +169,6 @@ fetchBanksUptime()
 
 ### Webhooks
 ```javascript
-fetchWebhook()
-
-updateWebhook(data: UpdateWebhookRequest)
-// data: { url: string }
 
 fetchWebhookHistory(page?: number, limit?: number)
 
