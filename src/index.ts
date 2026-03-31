@@ -30,9 +30,9 @@ export function getInstance(): AxiosInstance {
   return instance;
 }
 
-export { createAccount, fetchAccount, fetchAccounts } from './accounts';
+export { createAccount, fetchAccount, fetchAccounts, fetchAccountBalance } from './accounts';
 export { verifyTransaction, fetchTransactions } from './transactions';
 export { createCustomer, fetchCustomer, fetchCustomers } from './customers';
-export { initiatePayout, fetchPayout } from './payouts';
+export { initiatePayout, fetchPayout, fetchPayoutsWithPendingApprovals, approveOrDeclinePayout, merchantFeeCharge } from './payouts';
 export { fetchBanks, fetchBanksUptime, resolveAccount } from './banks';
 export { fetchWebhookHistory, resendWebhookEvent } from './webhook';

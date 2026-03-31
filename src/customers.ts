@@ -35,11 +35,18 @@ export async function fetchCustomer(customerId: string) {
   }
 }
 
-export async function fetchCustomers(page: number = 1, limit: number = 10) {
+interface FetchCustomersParams {
+  page?: number;
+  limit?: number;
+  gender?: string;
+  email?: string;
+  bvn?: string;
+  phone?: string;
+}
+
+export async function fetchCustomers(params: FetchCustomersParams = {}) {
   try {
-    const response = await getInstance().get('/v1/customers', {
-      params: { page, limit },
-    });
+    const response = await getInstance().get('/v1/customers', { params });
     return response.data;
   } catch (error) {
     return handleError(error);

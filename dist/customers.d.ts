@@ -14,5 +14,13 @@ interface CreateCustomerRequest {
 }
 export declare function createCustomer(customerData: CreateCustomerRequest): Promise<any>;
 export declare function fetchCustomer(customerId: string): Promise<any>;
-export declare function fetchCustomers(page?: number, limit?: number): Promise<any>;
+interface FetchCustomersParams {
+    page?: number;
+    limit?: number;
+    gender?: string;
+    email?: string;
+    bvn?: string;
+    phone?: string;
+}
+export declare function fetchCustomers(params?: FetchCustomersParams): Promise<any>;
 export {};

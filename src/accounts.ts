@@ -48,3 +48,12 @@ export async function fetchAccounts(page: number = 1, limit: number = 10) {
   }
 }
 
+export async function fetchAccountBalance(accountNumber: string) {
+  try {
+    const response = await getInstance().get(`/v1/accounts/${accountNumber}/balance`);
+    return response.data;
+  } catch (error) {
+    return handleError(error);
+  }
+} 
+
