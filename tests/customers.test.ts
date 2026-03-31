@@ -1,4 +1,4 @@
-import { createCustomer, fetchCustomer } from '../src/customers';
+import { createCustomer, fetchCustomer, fetchCustomers } from '../src/customers';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import axios from 'axios';
 
@@ -49,6 +49,60 @@ describe('Customer API', () => {
     const result = await fetchCustomer(customerId);
     expect(result).toEqual(responseData);
     expect(mockedAxios.get).toHaveBeenCalledWith(`/v1/customers/${customerId}`);
+  });
+
+  it('should fetch customers with no params', async () => {
+    const responseData = { status: 'success', message: 'Customers fetched successfully', data: [], total: 0, page: 1, limit: 10 };
+    mockedAxios.get.mockResolvedValueOnce({ data: responseData });
+
+    const result = await fetchCustomers();
+    expect(result).toEqual(responseData);
+    expect(mockedAxios.get).toHaveBeenCalledWith('/v1/customers', { params: {} });
+  });
+
+  it('should fetch customers with pagination params', async () => {
+    const responseData = { status: 'success', message: 'Customers fetched successfully', data: [], total: 0, page: 2, limit: 5 };
+    mockedAxios.get.mockResolvedValueOnce({ data: responseData });
+
+    const result = await fetchCustomers({ page: 2, limit: 5 });
+    expect(result).toEqual(responseData);
+    expect(mockedAxios.get).toHaveBeenCalledWith('/v1/customers', { params: { page: 2, limit: 5 } });
+  });
+
+  it('should fetch customers filtered by bvn', async () => {
+    const responseData = { status: 'success', message: 'Customers fetched successfully', data: [], total: 1, page: 1, limit: 10, filters_applied: { bvn: '11111011116' } };
+    mockedAxios.get.mockResolvedValueOnce({ data: responseData });
+
+    const result = await fetchCustomers({ bvn: '11111011116' });
+    expect(result).toEqual(responseData);
+    expect(mockedAxios.get).toHaveBeenCalledWith('/v1/customers', { params: { bvn: '11111011116' } });
+  });
+
+  it('should fetch customers filtered by email', async () => {
+    const responseData = { status: 'success', message: 'Customers fetched successfully', data: [], total: 1, page: 1, limit: 10 };
+    mockedAxios.get.mockResolvedValueOnce({ data: responseData });
+
+    const result = await fetchCustomers({ email: 'john.doe@example.com' });
+    expect(result).toEqual(responseData);
+    expect(mockedAxios.get).toHaveBeenCalledWith('/v1/customers', { params: { email: 'john.doe@example.com' } });
+  });
+
+  it('should fetch customers filtered by gender', async () => {
+    const responseData = { status: 'success', message: 'Customers fetched successfully', data: [], total: 3, page: 1, limit: 10 };
+    mockedAxios.get.mockResolvedValueOnce({ data: responseData });
+
+    const result = await fetchCustomers({ gender: 'MALE' });
+    expect(result).toEqual(responseData);
+    expect(mockedAxios.get).toHaveBeenCalledWith('/v1/customers', { params: { gender: 'MALE' } });
+  });
+
+  it('should fetch customers filtered by phone', async () => {
+    const responseData = { status: 'success', message: 'Customers fetched successfully', data: [], total: 1, page: 1, limit: 10 };
+    mockedAxios.get.mockResolvedValueOnce({ data: responseData });
+
+    const result = await fetchCustomers({ phone: '08071000030' });
+    expect(result).toEqual(responseData);
+    expect(mockedAxios.get).toHaveBeenCalledWith('/v1/customers', { params: { phone: '08071000030' } });
   });
 
   it('should handle API errors', async () => {

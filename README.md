@@ -125,7 +125,15 @@ createCustomer(customerData: CreateCustomerRequest)
 
 fetchCustomer(customerId: string)
 
-fetchCustomers(page?: number, limit?: number)
+fetchCustomers(params?: FetchCustomersParams)
+// params: {
+//   page?: number;    // Page number for pagination
+//   limit?: number;   // Number of customers per page
+//   gender?: string;  // Filter by gender (e.g. 'MALE', 'FEMALE')
+//   email?: string;   // Filter by customer email address
+//   bvn?: string;     // Filter by Bank Verification Number
+//   phone?: string;   // Filter by phone number
+// }
 ```
 
 ### Transactions
@@ -155,6 +163,21 @@ initiatePayout(payoutData: InitiatePayoutRequest)
 fetchPayout(payoutId: string)
 
 fetchPayoutsWithPendingApprovals(includeExpired?: boolean)
+
+approveOrDeclinePayout(data: PayoutApprovalRequest)
+// data: {
+//   authCode: string;              // Authorization code for the payout
+//   action: 'approve' | 'decline'; // Action to take
+//   reason?: string;               // Required if action is 'decline'
+// }
+
+merchantFeeCharge(data: MerchantFeeChargeRequest)
+// data: {
+//   amount: number;          // Amount in Naira. Must be a positive value.
+//   sourceAccountId: string; // Source account number to be debited.
+//   targetAccountId: string; // Target account number to be credited.
+//   description?: string;    // Optional narration/description for the fee charge.
+// }
 ```
 
 ### Banks
@@ -229,11 +252,20 @@ const newCustomer = await createCustomer(customerData);
 
 // Fetch customer details
 const customerDetails = await fetchCustomer('customer_id');
+
+// Fetch all customers (with pagination and filters)
+const customers = await fetchCustomers({ page: 1, limit: 10 });
+
+// Filter by BVN
+const byBvn = await fetchCustomers({ bvn: '11111011116' });
+
+// Filter by email
+const byEmail = await fetchCustomers({ email: 'john.doe@example.com' });
 ```
 
 ### Managing Payouts
 ```javascript
-import { initiatePayout, fetchPayout, fetchPayoutsWithPendingApprovals } from 'carbon-baas-sdk';
+import { initiatePayout, fetchPayout, fetchPayoutsWithPendingApprovals, approveOrDeclinePayout, merchantFeeCharge } from 'carbon-baas-sdk';
 
 // Initiate a payout
 const payoutData = {
@@ -260,6 +292,27 @@ const pendingPayouts = await fetchPayoutsWithPendingApprovals();
 
 // Fetch payouts with pending approvals including expired ones
 const allPendingPayouts = await fetchPayoutsWithPendingApprovals(true);
+
+// Approve a payout
+const approved = await approveOrDeclinePayout({
+  authCode: 'TRF-1771341301552SNKED',
+  action: 'approve'
+});
+
+// Decline a payout
+const declined = await approveOrDeclinePayout({
+  authCode: 'TRF-1771341301552SNKED',
+  action: 'decline',
+  reason: 'Insufficient documentation'
+});
+
+// Process a merchant fee charge
+const feeCharge = await merchantFeeCharge({
+  amount: 10,
+  sourceAccountId: '0340899287',
+  targetAccountId: '6009490194',
+  description: 'Fee Charge of N100'
+});
 ```
 
 ### Managing Webhooks

@@ -20813,11 +20813,9 @@ function fetchCustomer(customerId) {
     });
 }
 function fetchCustomers() {
-    return __awaiter(this, arguments, void 0, function* (page = 1, limit = 10) {
+    return __awaiter(this, arguments, void 0, function* (params = {}) {
         try {
-            const response = yield getInstance().get('/v1/customers', {
-                params: { page, limit },
-            });
+            const response = yield getInstance().get('/v1/customers', { params });
             return response.data;
         }
         catch (error) {
@@ -20852,6 +20850,28 @@ function fetchPayoutsWithPendingApprovals() {
     return __awaiter(this, arguments, void 0, function* (includeExpired = false) {
         try {
             const response = yield getInstance().get(`/v1/payouts/approvals?include_expired=${includeExpired}`);
+            return response.data;
+        }
+        catch (error) {
+            return handleError(error);
+        }
+    });
+}
+function approveOrDeclinePayout(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield getInstance().post('/v1/payouts/approvals/approve', data);
+            return response.data;
+        }
+        catch (error) {
+            return handleError(error);
+        }
+    });
+}
+function merchantFeeCharge(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield getInstance().post('/v1/payouts/merchant-fee-charge', data);
             return response.data;
         }
         catch (error) {
@@ -20945,6 +20965,7 @@ function getInstance() {
     return instance;
 }
 
+exports.approveOrDeclinePayout = approveOrDeclinePayout;
 exports.createAccount = createAccount;
 exports.createCustomer = createCustomer;
 exports.fetchAccount = fetchAccount;
@@ -20961,6 +20982,7 @@ exports.fetchWebhookHistory = fetchWebhookHistory;
 exports.getInstance = getInstance;
 exports.initialize = initialize;
 exports.initiatePayout = initiatePayout;
+exports.merchantFeeCharge = merchantFeeCharge;
 exports.resendWebhookEvent = resendWebhookEvent;
 exports.resolveAccount = resolveAccount;
 exports.verifyTransaction = verifyTransaction;

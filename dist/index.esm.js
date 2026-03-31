@@ -20811,11 +20811,9 @@ function fetchCustomer(customerId) {
     });
 }
 function fetchCustomers() {
-    return __awaiter(this, arguments, void 0, function* (page = 1, limit = 10) {
+    return __awaiter(this, arguments, void 0, function* (params = {}) {
         try {
-            const response = yield getInstance().get('/v1/customers', {
-                params: { page, limit },
-            });
+            const response = yield getInstance().get('/v1/customers', { params });
             return response.data;
         }
         catch (error) {
@@ -20850,6 +20848,28 @@ function fetchPayoutsWithPendingApprovals() {
     return __awaiter(this, arguments, void 0, function* (includeExpired = false) {
         try {
             const response = yield getInstance().get(`/v1/payouts/approvals?include_expired=${includeExpired}`);
+            return response.data;
+        }
+        catch (error) {
+            return handleError(error);
+        }
+    });
+}
+function approveOrDeclinePayout(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield getInstance().post('/v1/payouts/approvals/approve', data);
+            return response.data;
+        }
+        catch (error) {
+            return handleError(error);
+        }
+    });
+}
+function merchantFeeCharge(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield getInstance().post('/v1/payouts/merchant-fee-charge', data);
             return response.data;
         }
         catch (error) {
@@ -20943,5 +20963,5 @@ function getInstance() {
     return instance;
 }
 
-export { createAccount, createCustomer, fetchAccount, fetchAccountBalance, fetchAccounts, fetchBanks, fetchBanksUptime, fetchCustomer, fetchCustomers, fetchPayout, fetchPayoutsWithPendingApprovals, fetchTransactions, fetchWebhookHistory, getInstance, initialize, initiatePayout, resendWebhookEvent, resolveAccount, verifyTransaction };
+export { approveOrDeclinePayout, createAccount, createCustomer, fetchAccount, fetchAccountBalance, fetchAccounts, fetchBanks, fetchBanksUptime, fetchCustomer, fetchCustomers, fetchPayout, fetchPayoutsWithPendingApprovals, fetchTransactions, fetchWebhookHistory, getInstance, initialize, initiatePayout, merchantFeeCharge, resendWebhookEvent, resolveAccount, verifyTransaction };
 //# sourceMappingURL=index.esm.js.map
