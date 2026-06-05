@@ -7,3 +7,4 @@ export { createCustomer, fetchCustomer, fetchCustomers } from './customers';
 export { initiatePayout, fetchPayout, fetchPayoutsWithPendingApprovals, approveOrDeclinePayout, merchantFeeCharge } from './payouts';
 export { fetchBanks, fetchBanksUptime, resolveAccount } from './banks';
 export { fetchWebhookHistory, resendWebhookEvent } from './webhook';
+export { enrollCustomer, verifyCustomerKyc, getCustomerKycStatus, applyForLoan, listLoanApplications, getLoanApplication, submitUnderwriting, requestBankStatement, getBankStatementStatus, startDecisioning, calculateRepayment, getLoanOffer, setDisbursementAccount, acceptOffer, declineOffer, uploadLoanDocument, agreeToTerms, uploadBoardResolution, createGuarantor, getGuarantors, postOfferKyc, getActiveLoan, getRepaymentSchedule, chargeRepayment, listSupportedStatementBanks, } from './lending';

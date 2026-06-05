@@ -198,6 +198,105 @@ fetchWebhookHistory(page?: number, limit?: number)
 resendWebhookEvent(eventId: string)
 ```
 
+### Lending
+
+Enables fintech partners to originate business loans for their end-customers.
+All monetary values are in **kobo** (divide by 100 to get Naira).
+
+> Requires `LENDING_FEATURE_ENABLED=true` on the server.
+
+#### Customer enrollment
+```javascript
+enrollCustomer(customer_id: string)
+
+verifyCustomerKyc(customerId: string)
+
+getCustomerKycStatus(customerId: string)
+```
+
+#### Loan application
+```javascript
+applyForLoan(data: ApplyForLoanRequest)
+// data: {
+//   customer_id: string;
+//   amount: number;           // kobo
+//   repayment_period: number; // months (1–6)
+//   loan_purpose: string;     // WORKING_CAPITAL | EXPANSION_AND_GROWTH | EQUIPMENT_PURCHASE
+//                             // INVENTORY_MGT | DEBT_FINANCING | STARTUP_CAPITAL | OTHERS
+//   reference: string;        // merchant idempotency key
+// }
+
+listLoanApplications(params?: { status?: string; customer_id?: string; page?: number; limit?: number })
+
+getLoanApplication(applicationId: string)
+```
+
+#### Underwriting & decisioning
+```javascript
+submitUnderwriting(applicationId: string, data: {
+  monthly_revenue: number;
+  years_in_business: number;
+  num_employees: number;
+  business_sector: string;
+})
+
+requestBankStatement(applicationId: string, data: {
+  account_number: string;
+  sort_code: string;   // use listSupportedStatementBanks() to get valid values
+  num_months?: number;
+})
+
+getBankStatementStatus(applicationId: string)
+
+uploadLoanDocument(applicationId: string, file: File | Blob, file_tag: string)
+// file_tag: BANK_STATEMENT | BUSINESS_REG_DOCS | CAC_FORM7_DOCS | BOARD_RESOLUTION_DOC | OTHER
+
+startDecisioning(applicationId: string)
+```
+
+#### Offer
+```javascript
+calculateRepayment(data: { loan_amount: number; tenure: number; state: string })
+
+getLoanOffer(applicationId: string)
+
+setDisbursementAccount(applicationId: string, data: { account_number: string; bank_code: string })
+
+acceptOffer(applicationId: string)
+
+declineOffer(applicationId: string, data: { decline_reason: string })
+// decline_reason: HIGH_INTEREST | OFFER_SMALL | REPAYMENT_PERIOD | CHECKING | OTHERS
+```
+
+#### Post-offer steps
+```javascript
+agreeToTerms(applicationId: string)
+
+uploadBoardResolution(applicationId: string, data: { file_url: string })
+// file_url comes from uploadLoanDocument() with file_tag = BOARD_RESOLUTION_DOC
+
+createGuarantor(applicationId: string, data: {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string;
+})
+
+getGuarantors(applicationId: string)
+
+postOfferKyc(applicationId: string)
+```
+
+#### Repayment
+```javascript
+getActiveLoan(customer_id: string)
+
+getRepaymentSchedule(loanId: string)  // loanId from getActiveLoan()
+
+chargeRepayment(loanId: string, data: { amount: number; reference: string })
+
+```
+
 ## Example Usage
 
 ### Managing Accounts
@@ -341,6 +440,70 @@ const accountDetails = await resolveAccount({
 
 // Check banks uptime
 const uptime = await fetchBanksUptime();
+```
+
+### Lending Flow
+```javascript
+import {
+  enrollCustomer, verifyCustomerKyc, getCustomerKycStatus,
+  applyForLoan, submitUnderwriting, requestBankStatement,
+  uploadLoanDocument, startDecisioning, getLoanOffer,
+  setDisbursementAccount, acceptOffer, agreeToTerms,
+  uploadBoardResolution, createGuarantor, postOfferKyc,
+  getActiveLoan, getRepaymentSchedule, chargeRepayment,
+} from 'carbon-baas-sdk';
+
+// 1. Enroll customer for lending
+await enrollCustomer('customer_uuid');
+
+// 2. Trigger KYC verification
+await verifyCustomerKyc('customer_uuid');
+
+// 3. Poll until VERIFIED
+const { data: { kyc_status } } = await getCustomerKycStatus('customer_uuid');
+
+// 4. Apply for loan
+const { data: { application_id } } = await applyForLoan({
+  customer_id: 'customer_uuid',
+  amount: 2000000,          // ₦20,000 in kobo
+  repayment_period: 3,
+  loan_purpose: 'INVENTORY_MGT',
+  reference: 'MY_REF_001',
+});
+
+// 5. Submit business profile
+await submitUnderwriting(application_id, {
+  monthly_revenue: 5000000,
+  years_in_business: 3,
+  num_employees: 10,
+  business_sector: 'RETAIL',
+});
+
+// 6. Upload CAC document
+await uploadLoanDocument(application_id, cacFile, 'BUSINESS_REG_DOCS');
+
+// 7. Request bank statement
+const banks = await listSupportedStatementBanks();
+await requestBankStatement(application_id, { account_number: '0123456789', sort_code: '058' });
+
+// 8. Start decisioning then poll until HAS_OFFER
+await startDecisioning(application_id);
+
+// 9. Fetch offer
+const { data: offer } = await getLoanOffer(application_id);
+
+// 10. Set disbursement account and accept
+await setDisbursementAccount(application_id, { account_number: '0123456789', bank_code: '058' });
+await acceptOffer(application_id);
+
+// 11. Post-offer steps
+await agreeToTerms(application_id);
+await postOfferKyc(application_id);
+
+// 12. After disbursement — charge repayment
+const { data: { loanId } } = await getActiveLoan('customer_uuid');
+const schedule = await getRepaymentSchedule(loanId);
+await chargeRepayment(loanId, { amount: 719999, reference: 'REPAY_001' });
 ```
 
 ## Error Handling
