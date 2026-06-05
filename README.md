@@ -234,22 +234,61 @@ getLoanApplication(applicationId: string)
 #### Underwriting & decisioning
 ```javascript
 submitUnderwriting(applicationId: string, data: {
-  monthly_revenue: number;
-  years_in_business: number;
-  num_employees: number;
-  business_sector: string;
+  structure: {
+    hasWebsite: boolean;
+    hasSocialMediaHandles: boolean;
+    isRegisteredBusiness: boolean;
+    hasAuditedFinancialStatement: boolean;
+    payPension: boolean;
+    hasPayeeReceipt: boolean;
+    hasBusinessInsurance: boolean;
+    hasTaxClearanceCert: boolean;
+    hasCorporateBankAccount: boolean;
+    hasManagementAccounts: boolean;
+    hasAccountant: boolean;
+    hasStaffHealthCare: boolean;
+    ownProperty: boolean;
+    payRent: boolean;
+  };
+  address: {
+    street: string;
+    city: string;
+    lga: string;
+    state: string;
+    country: string;
+    addressVerificationType: 'POWER_BILL' | 'INTERNET_BILL' | 'WATER_CORPORATION_BILL' | 'WASTE_MANAGEMENT_BILL' | 'STAMPED_RENT_RECEIPT';
+  };
+  profile: {
+    yearsInBusiness: 'ONE' | 'TWO_TO_FIVE' | 'SIX_OR_MORE';
+    numberOfLocations: 'ONE' | 'TWO_TO_FIVE' | 'SIX_OR_MORE';
+    numberOfStaff: 'ONE_TO_FIVE' | 'SIX_TO_FIFTEEN' | 'SIXTEEN_OR_MORE';
+    grossProfitMargin: number;
+    operatingExpenses: number;
+    businessRole: string;
+    averageDailyCustomers: 'ONE_TO_FOUR' | 'FIVE_TO_FOURTEEN' | 'FIFTEEN_TO_TWENTYFOUR' | 'TWENTYFIVE_TO_FORTYNINE' | 'FIFTY_OR_MORE';
+    businessStartDate: string;   // ISO date: YYYY-MM-DD
+    businessType: string;
+    businessWebsite?: string;
+  };
+  userIdentity: {
+    idType: string;              // e.g. 'NIN', 'BVN'
+    idNumber: string;
+  };
 })
 
 requestBankStatement(applicationId: string, data: {
+  sort_code: string;       // use listSupportedStatementBanks() to get valid values
   account_number: string;
-  sort_code: string;   // use listSupportedStatementBanks() to get valid values
+  phone: string;
   num_months?: number;
 })
 
 getBankStatementStatus(applicationId: string)
 
-uploadLoanDocument(applicationId: string, file: File | Blob, file_tag: string)
-// file_tag: BANK_STATEMENT | BUSINESS_REG_DOCS | CAC_FORM7_DOCS | BOARD_RESOLUTION_DOC | OTHER
+uploadLoanDocument(applicationId: string, file: File | Blob, file_tag: FileTag)
+// file_tag: ADDITIONAL_DOCS | BANK_STATEMENTS | BUSINESS_REG_DOCS | CAC_FORM7_DOCS |
+//           FIN_ACCT_DOCS | ID_CARD_DOCS | PAYEE_PAYMENTS_DOCS | PENSION_PAYMENTS_DOCS |
+//           TAX_RETURNS_DOCS | ADDRESS_VERIFICATION_DOC | BOARD_RESOLUTION_DOC
 
 startDecisioning(applicationId: string)
 ```
@@ -445,8 +484,10 @@ const uptime = await fetchBanksUptime();
 ### Lending Flow
 ```javascript
 import {
+  createAccount,
   enrollCustomer, verifyCustomerKyc, getCustomerKycStatus,
-  applyForLoan, submitUnderwriting, requestBankStatement,
+  applyForLoan, submitUnderwriting,
+  listSupportedStatementBanks, requestBankStatement, getBankStatementStatus,
   uploadLoanDocument, startDecisioning, getLoanOffer,
   setDisbursementAccount, acceptOffer, agreeToTerms,
   uploadBoardResolution, createGuarantor, postOfferKyc,
@@ -471,36 +512,112 @@ const { data: { application_id } } = await applyForLoan({
   reference: 'MY_REF_001',
 });
 
-// 5. Submit business profile
-await submitUnderwriting(application_id, {
-  monthly_revenue: 5000000,
-  years_in_business: 3,
-  num_employees: 10,
-  business_sector: 'RETAIL',
+// 5. Create a Carbon account for the customer (used as statement source)
+const { data: { account_number: carbon_account } } = await createAccount({
+  account_type: 'static',
+  third_party: true,
+  customer_id: 'customer_uuid',
 });
 
-// 6. Upload CAC document
+// 6. Submit bank statements
+//    a. Carbon account statement (no sort_code needed — use Carbon's own sort code)
+const supportedBanks = await listSupportedStatementBanks();
+await requestBankStatement(application_id, {
+  sort_code: '565',        // Carbon MFB sort code
+  account_number: carbon_account,
+  phone: '08098765436',
+});
+
+//    b. Any other bank account the customer holds
+await requestBankStatement(application_id, {
+  sort_code: '058',        // use listSupportedStatementBanks() for valid sort codes
+  account_number: '0123456789',
+  phone: '08098765436',
+});
+
+// Poll until statement is ready before proceeding
+const { data: statementStatus } = await getBankStatementStatus(application_id);
+console.log('Statement status:', statementStatus);
+
+// 7. Upload required documents
 await uploadLoanDocument(application_id, cacFile, 'BUSINESS_REG_DOCS');
+await uploadLoanDocument(application_id, idFile, 'ID_CARD_DOCS');
+await uploadLoanDocument(application_id, bankStatementFile, 'BANK_STATEMENTS');
+// Add other docs as applicable: FIN_ACCT_DOCS, TAX_RETURNS_DOCS, ADDRESS_VERIFICATION_DOC, etc.
 
-// 7. Request bank statement
-const banks = await listSupportedStatementBanks();
-await requestBankStatement(application_id, { account_number: '0123456789', sort_code: '058' });
+// 8. Submit business profile
+await submitUnderwriting(application_id, {
+  structure: {
+    hasWebsite: true,
+    hasSocialMediaHandles: true,
+    isRegisteredBusiness: true,
+    hasAuditedFinancialStatement: false,
+    payPension: false,
+    hasPayeeReceipt: true,
+    hasBusinessInsurance: false,
+    hasTaxClearanceCert: false,
+    hasCorporateBankAccount: false,
+    hasManagementAccounts: false,
+    hasAccountant: true,
+    hasStaffHealthCare: false,
+    ownProperty: false,
+    payRent: true,
+  },
+  address: {
+    street: '12 Broad Street',
+    city: 'Lagos Island',
+    lga: 'Lagos Island',
+    state: 'LAGOS',
+    country: 'Nigeria',
+    addressVerificationType: 'POWER_BILL',
+  },
+  profile: {
+    yearsInBusiness: 'TWO_TO_FIVE',
+    numberOfLocations: 'ONE',
+    numberOfStaff: 'SIX_TO_FIFTEEN',
+    grossProfitMargin: 35,
+    operatingExpenses: 150000,
+    businessRole: 'OWNER',
+    averageDailyCustomers: 'FIFTEEN_TO_TWENTYFOUR',
+    businessStartDate: '2022-01-15',
+    businessType: 'SOLE_PROPRIETORSHIP',
+  },
+  userIdentity: {
+    idType: 'NIN',
+    idNumber: '12312312322',
+  },
+});
 
-// 8. Start decisioning then poll until HAS_OFFER
+// 9. Start decisioning then poll until response (optional) it's automated
 await startDecisioning(application_id);
 
-// 9. Fetch offer
+// 10. Fetch offer
 const { data: offer } = await getLoanOffer(application_id);
 
-// 10. Set disbursement account and accept
-await setDisbursementAccount(application_id, { account_number: '0123456789', bank_code: '058' });
+// 11. Set disbursement account (optional, it will default to carbon account associated with customer) and accept
+await setDisbursementAccount(application_id, { account_number: carbon_account, bank_code: '565' });
 await acceptOffer(application_id);
 
-// 11. Post-offer steps
+// 12. Post-offer steps
 await agreeToTerms(application_id);
+
+// For non-sole-proprietorship businesses, upload board resolution
+if (businessType !== 'SOLE_PROPRIETORSHIP') {
+  const doc = await uploadLoanDocument(application_id, boardResolutionFile, 'BOARD_RESOLUTION_DOC');
+  await uploadBoardResolution(application_id, { file_url: doc.data.file_url });
+}
+
+// Invite guarantor(s)
+await createGuarantor(application_id, {
+  first_name: 'Jane',
+  last_name: 'Doe',
+  phone: '08012345678',
+  email: 'jane.doe@example.com',
+});
+
 await postOfferKyc(application_id);
 
-// 12. After disbursement — charge repayment
+// 13. After disbursement — charge repayment
 const { data: { loanId } } = await getActiveLoan('customer_uuid');
 const schedule = await getRepaymentSchedule(loanId);
 await chargeRepayment(loanId, { amount: 719999, reference: 'REPAY_001' });

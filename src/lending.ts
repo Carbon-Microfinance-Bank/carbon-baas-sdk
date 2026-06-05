@@ -38,8 +38,7 @@ interface ApplyForLoanRequest {
   amount: number;
   /** Repayment period in months (1–6) */
   repayment_period: number;
-  /** WORKING_CAPITAL | EXPANSION_AND_GROWTH | EQUIPMENT_PURCHASE | INVENTORY_MGT | DEBT_FINANCING | STARTUP_CAPITAL | OTHERS */
-  loan_purpose: string;
+  loan_purpose: 'WORKING_CAPITAL' | 'EXPANSION_AND_GROWTH' | 'EQUIPMENT_PURCHASE' | 'INVENTORY_MGT' | 'DEBT_FINANCING' | 'STARTUP_CAPITAL' | 'OTHERS';
   /** Merchant-supplied idempotency key */
   reference: string;
 }
@@ -81,10 +80,46 @@ export async function getLoanApplication(applicationId: string) {
 // ── Underwriting & decisioning ───────────────────────────────────────────────
 
 interface SubmitUnderwritingRequest {
-  monthly_revenue: number;
-  years_in_business: number;
-  num_employees: number;
-  business_sector: string;
+  structure: {
+    hasWebsite: boolean;
+    hasSocialMediaHandles: boolean;
+    isRegisteredBusiness: boolean;
+    hasAuditedFinancialStatement: boolean;
+    payPension: boolean;
+    hasPayeeReceipt: boolean;
+    hasBusinessInsurance: boolean;
+    hasTaxClearanceCert: boolean;
+    hasCorporateBankAccount: boolean;
+    hasManagementAccounts: boolean;
+    hasAccountant: boolean;
+    hasStaffHealthCare: boolean;
+    ownProperty: boolean;
+    payRent: boolean;
+  };
+  address: {
+    street: string;
+    city: string;
+    lga: string;
+    state: string;
+    country: string;
+    addressVerificationType: 'POWER_BILL' | 'INTERNET_BILL' | 'WATER_CORPORATION_BILL' | 'WASTE_MANAGEMENT_BILL' | 'STAMPED_RENT_RECEIPT';
+  };
+  profile: {
+    yearsInBusiness: 'ONE' | 'TWO_TO_FIVE' | 'SIX_OR_MORE';
+    numberOfLocations: 'ONE' | 'TWO_TO_FIVE' | 'SIX_OR_MORE';
+    numberOfStaff: 'ONE_TO_FIVE' | 'SIX_TO_FIFTEEN' | 'SIXTEEN_OR_MORE';
+    grossProfitMargin: number;
+    operatingExpenses: number;
+    businessRole: 'OWNER' | 'PARTNER';
+    averageDailyCustomers: 'ONE_TO_FOUR' | 'FIVE_TO_FOURTEEN' | 'FIFTEEN_TO_TWENTYFOUR' | 'TWENTYFIVE_TO_FORTYNINE' | 'FIFTY_OR_MORE';
+    businessStartDate: string;
+    businessType: 'LIMITED_LIABILITY' | 'PARTNERSHIP' | 'SOLE_PROPRIETORSHIP' | 'NGO';
+    businessWebsite?: string;
+  };
+  userIdentity: {
+    idType: string;
+    idNumber: string;
+  };
 }
 
 export async function submitUnderwriting(applicationId: string, data: SubmitUnderwritingRequest) {
@@ -97,10 +132,9 @@ export async function submitUnderwriting(applicationId: string, data: SubmitUnde
 }
 
 interface RequestBankStatementRequest {
-  account_number: string;
-  /** Bank sort code — use listSupportedStatementBanks() to get valid values */
   sort_code: string;
-  num_months?: number;
+  account_number: string;
+  phone: string;
 }
 
 export async function requestBankStatement(applicationId: string, data: RequestBankStatementRequest) {
@@ -180,8 +214,7 @@ export async function acceptOffer(applicationId: string) {
 }
 
 interface DeclineOfferRequest {
-  /** HIGH_INTEREST | OFFER_SMALL | REPAYMENT_PERIOD | CHECKING | OTHERS */
-  decline_reason: string;
+  decline_reason: 'HIGH_INTEREST' | 'OFFER_SMALL' | 'REPAYMENT_PERIOD' | 'CHECKING' | 'OTHERS';
 }
 
 export async function declineOffer(applicationId: string, data: DeclineOfferRequest) {
